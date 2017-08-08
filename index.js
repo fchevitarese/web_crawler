@@ -1,11 +1,10 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const pages = require("./pages");
-const parseData = require("./parseObject");
+const { pages, save } = require("./pages");
+const parsePage = require("./parseObject");
+const { parseDate } = require("./utils/parseDate");
 
-// "https://www.scotconsultoria.com.br/cotacoes/reposicao/?ref=smn" ->> Very different
-
-const getData2 = page => {
+const getData = page => {
   axios
     .get(page.url)
     .then(response => {
@@ -16,15 +15,21 @@ const getData2 = page => {
         texts.push($(this).text());
       });
 
+      let dateInfo = parseDate($("h2").text());
+
       const data = texts.map(item => {
-        return parseData(item.replace(/(\r\n|\n|\r)/gm, "|"), page);
+        return parsePage(item.replace(/(\r\n|\n|\r)/gm, "|"), page, dateInfo);
       });
 
-      console.log(data);
+      if (page.model) {
+        save(data, page.model);
+      } else {
+        console.log(data);
+      }
     })
     .catch(err => {
       console.log(err);
     });
 };
 
-pages.forEach(page => getData2(page));
+pages.forEach(page => getData(page));

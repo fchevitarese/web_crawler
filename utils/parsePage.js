@@ -7,7 +7,10 @@ const parseData = (data, page, date) => {
     return elem.trim() !== "";
   });
 
-  let last_header = "";
+  if (page.state_parser && tmp.length !== page.header.length) {
+    tmp.unshift("-");
+  }
+
   tmp.map((elem, i) => {
     object[[page.header[i]]] = elem.trim();
   });

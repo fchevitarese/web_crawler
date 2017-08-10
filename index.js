@@ -1,13 +1,30 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { pages, save } = require("./pages");
-const parsePage = require("./parseObject");
 const { parseDate } = require("./utils/parseDate");
+
+let last_state = "";
+
+const resolveState = object => {
+  if (last_state === "") {
+    last_state = object.uf;
+  }
+
+  if (object.uf == "-") {
+    object.uf = last_state;
+  }
+
+  if (last_state !== object.uf && object.uf !== "-") {
+    last_state = object.uf;
+  }
+  return object;
+};
 
 const getData = page => {
   axios
     .get(page.url)
     .then(response => {
+      console.log(`Processing ${page.item}...`);
       let $ = cheerio.load(response.data, { decodeEntities: false });
 
       let texts = [];
@@ -18,7 +35,26 @@ const getData = page => {
       let dateInfo = parseDate($("h2").text());
 
       const data = texts.map(item => {
-        return parsePage(item.replace(/(\r\n|\n|\r)/gm, "|"), page, dateInfo);
+        // if (page.parser)
+        //   page
+        //     .parser(item.replace(/(\r\n|\n|\r)/gm, "|"), page, dateInfo)
+        //     .then(result => {
+        //       console.log
+        //       return result;
+        //     })
+        //     .catch(err => {
+        //       return err;
+        //     });
+        let result = page.parser(
+          item.replace(/(\r\n|\n|\r)/gm, "|"),
+          page,
+          dateInfo
+        );
+
+        if (page.state_parser) {
+          result = resolveState(result);
+        }
+        return result;
       });
 
       if (page.model) {

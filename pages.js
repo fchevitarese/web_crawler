@@ -10,6 +10,9 @@ const { Atacado } = require("./models/Atacado");
 const { IndicadoresScot } = require("./models/IndicadoresScot");
 const { Leite } = require("./models/Leite");
 const { Soja } = require("./models/Soja");
+const { Milho } = require("./models/Milho");
+
+const parsePage = require("./utils/parsePage");
 
 mongoose.Promise = global.Promise;
 mongoose.connect(
@@ -39,7 +42,9 @@ const pages = [
       "ano",
       "data"
     ],
-    model: BoiGordo
+    state_parser: false,
+    model: BoiGordo,
+    parser: parsePage
   },
   {
     item: "vaca",
@@ -56,14 +61,18 @@ const pages = [
       "ano",
       "data"
     ],
-    model: VacaGorda
+    state_parser: false,
+    model: VacaGorda,
+    parser: parsePage
   },
   {
     item: "couro_sebo",
     url: "https://www.scotconsultoria.com.br/cotacoes/couro-e-sebo/?ref=smn",
     title: "Cotações - Couro e Sebo",
     header: ["preco", "brasil_central", "rs", "data"],
-    model: CouroSebo
+    state_parser: false,
+    model: CouroSebo,
+    parser: parsePage
   },
   {
     item: "mercado_futuro",
@@ -78,28 +87,36 @@ const pages = [
       "us_a_vista",
       "data"
     ],
-    model: MercadoFuturo
+    state_parser: false,
+    model: MercadoFuturo,
+    parser: parsePage
   },
   {
     item: "boi_no_mundo",
     url: "https://www.scotconsultoria.com.br/cotacoes/boi-no-mundo/?ref=smn",
     title: "Cotações - Boi no mundo",
     header: ["pais", "dolar", "ha_1_ano", "data"],
-    model: BoiNoMundo
+    state_parser: false,
+    model: BoiNoMundo,
+    parser: parsePage
   },
   {
     item: "atacado",
     url: "https://www.scotconsultoria.com.br/cotacoes/atacado/?ref=smn",
     title: "Cotações - Atacado",
     header: ["preco", "boi", "vaca", "ha_1_ano_boi", "data"],
-    model: Atacado
+    state_parser: false,
+    model: Atacado,
+    parser: parsePage
   },
   {
     item: "indicadores",
     url: "https://www.scotconsultoria.com.br/cotacoes/indicadores/?ref=smn",
     title: "Cotações - Indicadores",
-    header: ["indicador", "boi", "margem", "vaca", "margem", "data"],
-    model: IndicadoresScot
+    header: ["indicador", "boi", "margem", "vaca", "margem"],
+    state_parser: false,
+    model: IndicadoresScot,
+    parser: parsePage
   },
   {
     item: "leite",
@@ -115,24 +132,29 @@ const pages = [
       "media_qualidade_reais_litro",
       "media_qualidade_us_litro",
       "media_padrao_reais_litro",
-      "media_padrao_us_litro",
-      "data"
+      "media_padrao_us_litro"
     ],
-    model: Leite
+    state_parser: true,
+    model: Leite,
+    parser: parsePage
   },
   {
     item: "soja",
     url: "https://www.scotconsultoria.com.br/cotacoes/soja/?ref=smn",
     title: "Cotações - Soja",
-    header: ["uf", "cidade", "compra", "venda", "data"],
-    model: Soja
+    header: ["uf", "cidade", "compra", "venda"],
+    state_parser: true,
+    model: Soja,
+    parser: parsePage
   },
   {
     item: "milho",
     url: "https://www.scotconsultoria.com.br/cotacoes/milho/?ref=smn",
     title: "Cotações - Milho",
-    header: ["uf", "cidade", "compra", "venda", "data"],
-    model: Milho
+    header: ["uf", "cidade", "compra", "venda"],
+    state_parser: true,
+    model: Milho,
+    parser: parsePage
   }
 ];
 

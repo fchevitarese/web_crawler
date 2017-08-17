@@ -11,8 +11,6 @@
   "dependencies": {
     "axios": "^0.16.2",
     "cheerio": "^1.0.0-rc.2",
-    "cheerio-tableparser": "^1.0.1",
-    "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "mongoose": "^4.11.5",
     "request": "^2.81.0"

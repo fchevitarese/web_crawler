@@ -21,7 +21,7 @@ mongoose.connect(
 
 const save = (data, model) => {
   model.insertMany(data, function(err, result) {
-    if (err) return err;
+    if (err) console.log(err);
     return result;
   });
 };
@@ -52,14 +52,13 @@ const pages = [
     title: "Cotações Vaca Gorda",
     header: [
       "cidade",
-      "à_vista",
+      "a_vista",
       "real_30_d",
       "dolar30_d",
       "mf_2",
       "us_7d",
       "us_30d",
-      "ano",
-      "data"
+      "ano"
     ],
     state_parser: false,
     model: VacaGorda,

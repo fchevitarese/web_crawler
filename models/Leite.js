@@ -10,7 +10,7 @@ const Leite = mongoose.model("Leite", {
   media_qualidade_reais_litro: { type: String, trim: true },
   media_qualidade_us_litro: { type: String, trim: true },
   media_padrao_reais_litro: { type: String, trim: true },
-  media_padrao_us_litr: { type: String, trim: true },
+  media_padrao_us_litro: { type: String, trim: true },
   data: { type: String, trim: true }
 });
 

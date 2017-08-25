@@ -20,27 +20,32 @@ const resolveState = object => {
   return object;
 };
 
+const getItems = (data, selector) => {
+  // Generic function to parse the html with the selector
+  let texts = [];
+
+  data(`${selector}`).each(function(i, elem) {
+    texts.push(data(this).text());
+  });
+
+  return texts;
+};
+
 const getData = page => {
   axios
     .get(page.url)
     .then(response => {
       console.log(`Processing ${page.item}...`);
 
-      let $ = cheerio.load(response.data, { decodeEntities: false });
-      let texts = [];
+      let $ = cheerio.load(response.data.toString(), { decodeEntities: false });
 
       let dateInfo = "";
-      $(".fonte-subtitulo-cinza").each(function(i, elem) {
-        texts.push($(this).text());
-      });
+      let texts = getItems($, page.selector);
+
       dateInfo = parseDate($("h2").text());
 
-      const data = texts.map(item => {
-        let result = page.parser(
-          item.replace(/(\r\n|\n|\r)/gm, "|"),
-          page,
-          dateInfo
-        );
+      let data = texts.map(item => {
+        let result = page.parser(item, page, dateInfo);
 
         if (page.state_parser) {
           result = resolveState(result);
@@ -49,6 +54,9 @@ const getData = page => {
       });
 
       if (page.model) {
+        if (page.filter_null) {
+          data = data.filter(item => item !== null);
+        }
         save(data, page.model);
       } else {
         console.log(data);

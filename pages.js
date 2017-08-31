@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const moment = require("moment");
 
 // Models
 const { BoiGordo } = require("./models/BoiGordo");
@@ -14,14 +15,25 @@ const { Milho } = require("./models/Milho");
 
 const parsePage = require("./utils/parsePage");
 const ParseMercadoFuturo = require("./utils/MercadoFuturoParser");
+const {
+  reposicaoParser,
+  reposicaoGetData
+} = require("./utils/reposicaoParser");
 
 mongoose.Promise = global.Promise;
 mongoose.connect(
   "mongodb://dbadmin:1qazse4r5@ds151279.mlab.com:51279/cotacoes_crawler"
 );
 
-const save = (data, model) => {
-  model.insertMany(data, function(err, result) {
+const save = (items, model, dateInfo) => {
+  today_data = model
+    .find({ data: dateInfo })
+    .remove()
+    .exec((err, data) => {
+      if (err) console.log(err);
+    });
+
+  model.insertMany(items, function(err, result) {
     if (err) console.log(err);
     return result;
   });
@@ -176,6 +188,12 @@ const pages = [
     state_parser: true,
     model: Milho,
     parser: parsePage
+  },
+  {
+    item: "reposicao",
+    url: "https://www.scotconsultoria.com.br/cotacoes/reposicao/?ref=smn",
+    title: "Tabela de reposição",
+    getData: reposicaoGetData
   }
 ];
 

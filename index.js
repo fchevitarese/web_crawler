@@ -38,28 +38,38 @@ const getData = page => {
       console.log(`Processing ${page.item}...`);
 
       let $ = cheerio.load(response.data.toString(), { decodeEntities: false });
-
+      let data;
       let dateInfo = "";
-      let texts = getItems($, page.selector);
+      if (page.item !== "reposicao") {
+        let texts = getItems($, page.selector);
 
-      dateInfo = parseDate($("h2").text());
-
-      let data = texts.map(item => {
-        let result = page.parser(item, page, dateInfo);
-
-        if (page.state_parser) {
-          result = resolveState(result);
+        if (parseDate($("h2").text()) !== "") {
+          dateInfo = parseDate($("h2").text());
+        } else {
+          dateInfo = parseDate($("p").text());
         }
-        return result;
-      });
 
-      if (page.model) {
-        if (page.filter_null) {
-          data = data.filter(item => item !== null);
+        data = texts.map(item => {
+          let result = page.parser(item, page, dateInfo);
+
+          if (page.state_parser) {
+            result = resolveState(result);
+          }
+          return result;
+        });
+
+        if (page.model) {
+          if (page.filter_null) {
+            data = data.filter(item => item !== null);
+          }
+          // console.log(data);
+          save(data, page.model, dateInfo);
+        } else {
+          console.log(data);
         }
-        save(data, page.model);
       } else {
-        console.log(data);
+        // Reposição. Parseia e insere de uma só vez.
+        data = page.getData($);
       }
     })
     .catch(err => {

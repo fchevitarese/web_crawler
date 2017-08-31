@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 const Reposicao = mongoose.model("Reposicao", {
-  tipo: { type: String, trim: true },
-  prices: [],
-  data: { type: String, trim: true }
+  raca: { type: String, trim: true },
+  data: { type: String, trim: true },
+  cotacoes: []
 });
 
 module.exports = { Reposicao };

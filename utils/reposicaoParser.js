@@ -1,5 +1,7 @@
 const _ = require("lodash");
+const tbParser = require("cheerio-tableparser");
 const { parseDate } = require("./parseDate");
+const { Reposicao } = require("../models/Reposicao");
 
 const clearString = txt => txt.replace(/[\n\t\r]/g, "").trim();
 const splitString = txt => txt.replace(/(\r\n|\n|\r)/gm, "|").split("|");
@@ -17,6 +19,8 @@ const clearHeader = txt => {
 const reposicaoGetData = data => {
   const tableData = [];
   const tableInfo = [];
+  const contents = [];
+  let dateInfo = "";
 
   data("table thead").each(function(i, elem) {
     let item = data(this).text();
@@ -28,45 +32,54 @@ const reposicaoGetData = data => {
 
   data(".top").each(function(i, elem) {
     let item = data(this).text();
-
     tableData[i].items = clearHeader(item);
     tableData[i].headers = ["UF", "R$/cab", "R$/@", "Troca"];
     tableData[i].prices = [];
+    tableData[i].content = [];
   });
 
-  let tmpState = "";
-  let dados = [];
-  let tmpObj = {};
-  data("table .conteudo").each(function(i, elem) {
-    let item = data(this).text();
-    let tmp = splitString(item);
+  // Get all table data.
+  data("table").each(function(c, elem) {
+    let txtData = data(elem)
+      .find("tbody .conteudo")
+      .text();
+    let tmp = splitString(txtData);
     let items = tmp.map(item => clearString(item));
-    items = items.filter(item => item !== "");
+    items = items.filter(item => item != "");
 
-    var control = 0;
-    var controlHeader = 0;
-    var itemCounter = 0;
-    tmpObj = {
-      tipo: tableData[i][`${i}`],
-      data: parseDate(tableData[i][`${i}`]),
-      prices: []
-    };
-    tableData[i].items.forEach(item => {
-      tmpObj.prices[item] = [];
+    let it = _.chunk(items, 13);
+    let tmpState = "";
+    it.forEach((elem, count) => {
+      tmpState = elem.shift();
+
+      let tmp = _.chunk(elem, 3);
+      dateInfo = parseDate(tableData[c][`${c}`].split("-")[1]);
+      let tmpObj = {
+        raca: tableData[c][`${c}`].split("-")[0].trim(),
+        data: dateInfo,
+        cotacoes: []
+      };
+
+      tmp.forEach((elem, i) => {
+        elem.unshift(tmpState);
+        let item = _.zipObject(tableData[c].headers, elem);
+        item["tipo"] = tableData[c].items[i];
+        tmpObj.cotacoes.push(item);
+      });
+      contents.push(tmpObj);
+    });
+  });
+
+  // Save data.
+  today_data = Reposicao.find({ data: dateInfo })
+    .remove()
+    .exec((err, data) => {
+      if (err) console.log(err);
     });
 
-    let tmpState = items.shift();
-    console.log(i);
-
-    let tmpItems = _.chunk(items, 3);
-    let result = [];
-    tmpItems.forEach((elem, idx) => {
-      elem.unshift(tmpState);
-      let tmp = _.zipObject(tableData[i].headers, elem);
-      tmpObj.prices[tableData[i].items[idx]].push(tmp);
-      // tmpObj[tableData[i].items[idx]].push(_.extend(tmp, tmpObj));
-      // result.push(_.extend(tmp, tmpObj));
-    });
+  Reposicao.insertMany(contents, function(err, docs) {
+    if (err) return err;
+    return docs;
   });
 };
 

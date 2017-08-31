@@ -57,19 +57,19 @@ const getData = page => {
           }
           return result;
         });
-      } else {
-        // Passing the page data to the function.
-        data = page.getData($);
-      }
 
-      if (page.model) {
-        if (page.filter_null) {
-          data = data.filter(item => item !== null);
+        if (page.model) {
+          if (page.filter_null) {
+            data = data.filter(item => item !== null);
+          }
+          // console.log(data);
+          save(data, page.model, dateInfo);
+        } else {
+          console.log(data);
         }
-        // console.log(data);
-        save(data, page.model, dateInfo);
       } else {
-        console.log(data);
+        // Reposição. Parseia e insere de uma só vez.
+        data = page.getData($);
       }
     })
     .catch(err => {
